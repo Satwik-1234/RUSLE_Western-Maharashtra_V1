@@ -45,7 +45,7 @@
 
 <div align="center">
 
-[![Streamlit Dashboard](https://img.shields.io/badge/Streamlit-Live_Dashboard-FF4B4B?style=for-the-badge&logo=streamlit&logoColor=white)]([https://satwik-1234-rusle-western-maharashtra-v1.streamlit.app](https://ruslewestern-maharashtrav1.streamlit.app/))
+[![Streamlit Dashboard](https://img.shields.io/badge/Streamlit-Live_Dashboard-FF4B4B?style=for-the-badge&logo=streamlit&logoColor=white)](https://satwik-1234-rusle-western-maharashtra-v1.streamlit.app](https://ruslewestern maharashtrav1.streamlit.app/)
 
 **Explore the soil erosion analysis interactively — no coding required!**
 
