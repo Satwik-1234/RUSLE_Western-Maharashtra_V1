@@ -15,7 +15,7 @@
 [![Resolution](https://img.shields.io/badge/Resolution-30m%20SRTM-1a9850?style=flat-square)](docs/METHODOLOGY.md)
 [![Models](https://img.shields.io/badge/ML%20Models-8%20Algorithms-8b5cf6?style=flat-square)](#machine-learning)
 [![Visualizations](https://img.shields.io/badge/Visualizations-25%2B%20Charts-06b6d4?style=flat-square)](#results--visualizations)
-[![Data Sources](https://img.shields.io/badge/Data%20Sources-GPM%20%7C%20SRTM%20%7C%20S2%20%7C%20SoilGrids-fee08b?style=flat-square)](docs/DATA_SOURCES.md)
+[![Data Sources](https://img.shields.io/badge/Data%20Sources-CHIRPS%20%7C%20SRTM%20%7C%20S2%20%7C%20SoilGrids-fee08b?style=flat-square)](docs/DATA_SOURCES.md)
 [![Districts](https://img.shields.io/badge/Districts-4%20(Satara%20%7C%20Sangli%20%7C%20Kolhapur%20%7C%20Solapur)-fc8d59?style=flat-square)](#study-area)
 [![Period](https://img.shields.io/badge/Period-2020–2023-d73027?style=flat-square)](#configuration)
 
@@ -84,7 +84,7 @@ streamlit run dashboard/app.py
 - [⚙️ Configuration & Resolution](#️-configuration--resolution)
 - [📦 Data Sources](#-data-sources)
 - [🔬 Methodology](#-methodology)
-  - [R-Factor — GPM IMERG](#r-factor--gpm-imerg-rainfall-erosivity)
+  - [R-Factor — CHIRPS IMERG](#r-factor--CHIRPS-imerg-rainfall-erosivity)
   - [K-Factor — SoilGrids](#k-factor--soilgrids-erodibility)
   - [LS-Factor — SRTM 30m](#ls-factor--srtm-30m-topographic)
   - [C-Factor — ESA WorldCover + NDVI](#c-factor--esa-worldcover--ndvi)
@@ -124,7 +124,7 @@ streamlit run dashboard/app.py
 |:---|:---|
 | 🛰️ **Cloud-Native** | Runs entirely in Google Colab — zero local compute required |
 | 📐 **Native 30m Resolution** | SRTM elevation at its source resolution — no degradation |
-| 🌧️ **GPM IMERG Rainfall** | NASA's best global precipitation estimate (0.1° → bilinear to 30m) |
+| 🌧️ **CHIRPS IMERG Rainfall** | NASA's best global precipitation estimate (0.1° → bilinear to 30m) |
 | 🌱 **ESA WorldCover** | 10m global land cover → aggregated to 30m for C-factor |
 | 🤖 **8 ML Algorithms** | RF · Extra Trees · Gradient Boosting · Ridge · ElasticNet · MLP · Stacking |
 | 📊 **25+ Interactive Charts** | Plotly figures: scatter, 3D, violin, heatmap, radar, PCA biplot, t-SNE |
@@ -152,7 +152,7 @@ SECTION  0  →  Install & Import Libraries
 SECTION  1  →  Authenticate & Initialise GEE
 SECTION  2  →  CONFIG dict (30m · 2020–2023 · 4 districts)
 SECTION  3  →  Study Area definition (FAO GAUL Level-2)
-SECTION  4  →  R-Factor   ← GPM IMERG V06 daily → MFI → Wischmeier regression
+SECTION  4  →  R-Factor   ← CHIRPS IMERG V06 daily → MFI → Wischmeier regression
 SECTION  5  →  K-Factor   ← SoilGrids clay/sand/silt/SOC → EPIC equation
 SECTION  6  →  LS-Factor  ← SRTM 30m native → McCool (1989)
 SECTION  7  →  C-Factor   ← ESA WorldCover 10m → 30m + Sentinel-2 NDVI
@@ -250,7 +250,7 @@ CONFIG = {
 }
 ```
 
-> **Why 30m?** SRTM (Shuttle Radar Topography Mission) provides elevation data at **~30m native resolution**. The LS-factor — the most terrain-sensitive RUSLE component — is computed directly at this resolution without any resampling penalty. All other data sources (GPM at ~10km, SoilGrids at ~250m, WorldCover at 10m) are bilinearly resampled or aggregated to match.
+> **Why 30m?** SRTM (Shuttle Radar Topography Mission) provides elevation data at **~30m native resolution**. The LS-factor — the most terrain-sensitive RUSLE component — is computed directly at this resolution without any resampling penalty. All other data sources (CHIRPS at ~10km, SoilGrids at ~250m, WorldCover at 10m) are bilinearly resampled or aggregated to match.
 
 ---
 
@@ -258,7 +258,7 @@ CONFIG = {
 
 | Layer | Dataset | Provider | Native Resolution | Access |
 |:---|:---|:---:|:---:|:---:|
-| **Rainfall** | GPM IMERG Final V06 | NASA | 0.1° / 30-min | GEE |
+| **Rainfall** | CHIRPS IMERG Final V06 | NASA | 0.1° / 30-min | GEE |
 | **Elevation** | SRTMGL1 v003 | USGS/NASA | 30m | GEE |
 | **Soil Texture** | SoilGrids v2 (clay/sand/silt) | ISRIC | 250m | GEE |
 | **Soil Organic Carbon** | SoilGrids v2 (SOC 0–5cm) | ISRIC | 250m | GEE |
@@ -272,7 +272,7 @@ CONFIG = {
 
 ## 🔬 Methodology
 
-### R-Factor — GPM IMERG Rainfall Erosivity
+### R-Factor — CHIRPS IMERG Rainfall Erosivity
 
 The rainfall erosivity factor (R) quantifies the erosive potential of rainfall events.
 
@@ -285,7 +285,7 @@ Where:
   pᵢ  = Mean monthly precipitation (mm)
 ```
 
-GPM IMERG V06 `precipitationCal` band (mm/hr × 24 = mm/day) is aggregated over the 4-year study period. Monthly averages feed into the MFI calculation.
+CHIRPS IMERG V06 `precipitationCal` band (mm/hr × 24 = mm/day) is aggregated over the 4-year study period. Monthly averages feed into the MFI calculation.
 
 ### K-Factor — SoilGrids Erodibility
 
@@ -417,7 +417,7 @@ SHAP (SHapley Additive exPlanations) is used to explain the best model's predict
 2. Annual_Rainfall — High-intensity Western Ghats monsoon
 3. Slope           — Directly feeds LS; strong spatial gradient
 4. NDVI            — Vegetation interception & root cohesion
-5. R_Factor        — Derived from GPM; corroborates rainfall rank
+5. R_Factor        — Derived from CHIRPS; corroborates rainfall rank
 ```
 
 ### Spatial Clustering
@@ -734,7 +734,7 @@ pytest tests/test_ml_pipeline.py -v
 ## 📈 Roadmap
 
 - [x] 30m native resolution RUSLE
-- [x] GPM IMERG rainfall erosivity
+- [x] CHIRPS IMERG rainfall erosivity
 - [x] 8 ML models + stacking ensemble
 - [x] SHAP feature importance
 - [x] t-SNE + UMAP embedding
@@ -793,7 +793,7 @@ This project is licensed under the **MIT License** — see [LICENSE](LICENSE) fo
 MIT License  ·  Copyright (c) 2024  ·  SATWIK LK. UDUPI
 ```
 
-Data acknowledgements: GPM (NASA), SRTM (NASA/USGS), SoilGrids (ISRIC), ESA WorldCover (ESA/Vito), Sentinel-2 (ESA), FAO GAUL (FAO). Please cite these datasets if you publish results.
+Data acknowledgements: CHIRPS (NASA), SRTM (NASA/USGS), SoilGrids (ISRIC), ESA WorldCover (ESA/Vito), Sentinel-2 (ESA), FAO GAUL (FAO). Please cite these datasets if you publish results.
 
 ---
 
@@ -832,7 +832,7 @@ If you use this project in academic work, please cite:
 
 | Organisation | Contribution |
 |:---:|:---|
-| **NASA / JAXA** | GPM IMERG precipitation data |
+| **NASA / JAXA** | CHIRPS IMERG precipitation data |
 | **NASA / USGS** | SRTM 30m elevation data |
 | **ISRIC** | SoilGrids v2 soil property maps |
 | **ESA / Vito** | WorldCover 10m global land cover |

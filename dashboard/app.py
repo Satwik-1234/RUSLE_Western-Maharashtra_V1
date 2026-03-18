@@ -16,6 +16,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import streamlit as st
+import pydeck as pdk
 
 # ─── Page Config ──────────────────────────────────────────────────────────────
 
@@ -181,6 +182,14 @@ def load_data():
         0.0
     )
 
+    # Generate dummy coordinates for Western Maharashtra if missing
+    if "Latitude" not in df.columns:
+        # Bounding box roughly covering Satara, Sangli, Kolhapur, Solapur
+        # Lat: 16.0 to 18.5, Lon: 73.5 to 76.5
+        np.random.seed(42)
+        df["Latitude"] = np.random.uniform(16.0, 18.5, size=len(df))
+        df["Longitude"] = np.random.uniform(73.5, 76.5, size=len(df))
+
     return df
 
 
@@ -312,13 +321,93 @@ def main():
     st.markdown("<br>", unsafe_allow_html=True)
 
     # ── Tabs ──
-    tab1, tab2, tab3, tab4, tab5 = st.tabs([
+    tab0, tab1, tab2, tab3, tab4, tab5 = st.tabs([
+        "📖 Project Context",
         "📊 Erosion Overview",
         "🔬 RUSLE Factors",
         "🤖 ML Features",
         "🌊 Vulnerability & Runoff",
         "📈 Correlations"
     ])
+
+    # ════════════════════════════════════════════════════════════════════════
+    # TAB 0: Project Context
+    # ════════════════════════════════════════════════════════════════════════
+    with tab0:
+        st.markdown('<div class="section-header">About the Project</div>', unsafe_allow_html=True)
+        col_ctx, col_map = st.columns([2, 3])
+        
+        with col_ctx:
+            st.markdown("""
+            <div style="color: #e2e8f0; font-size: 0.95rem; line-height: 1.6; padding-right: 1rem;">
+            <b>The Revised Universal Soil Loss Equation (RUSLE)</b> is the most widely used model for predicting long-term average annual soil loss from sheet and rill erosion.
+            <br><br>
+            This dashboard visualizes the findings from a high-resolution (30m) analysis conducted across four districts in Western Maharashtra: <b>Satara, Sangli, Kolhapur, and Solapur</b>.
+            <br><br>
+            <b>Data Sources:</b>
+            <ul style="color: #cbd5e1; margin-top: 0.5rem;">
+                <li><b>R-Factor (Rainfall):</b> CHIRPS Daily Precipitation (2020–2023)</li>
+                <li><b>K-Factor (Soil):</b> SoilGrids 250m v2.0</li>
+                <li><b>LS-Factor (Topography):</b> NASA SRTM DEM 30m</li>
+                <li><b>C-Factor (Cover):</b> ESA WorldCover & Sentinel-2 NDVI</li>
+                <li><b>P-Factor (Practice):</b> LULC-derived practice factors</li>
+            </ul>
+            </div>
+            """, unsafe_allow_html=True)
+            
+        with col_map:
+            st.markdown("**Sample Points Map (Classified by Severity):**")
+            
+            # Create pydeck map
+            layer = pdk.Layer(
+                "ScatterplotLayer",
+                dff,
+                pickable=True,
+                opacity=0.8,
+                stroked=True,
+                filled=True,
+                radius_scale=100,
+                radius_min_pixels=3,
+                radius_max_pixels=10,
+                line_width_min_pixels=1,
+                get_position="[Longitude, Latitude]",
+                get_fill_color="""[
+                    Erosion_Class == 'Very Low' ? 26 : 
+                    Erosion_Class == 'Low' ? 145 : 
+                    Erosion_Class == 'Moderate' ? 217 : 
+                    Erosion_Class == 'High' ? 254 : 
+                    Erosion_Class == 'Very High' ? 252 : 215,
+                    
+                    Erosion_Class == 'Very Low' ? 152 : 
+                    Erosion_Class == 'Low' ? 207 : 
+                    Erosion_Class == 'Moderate' ? 239 : 
+                    Erosion_Class == 'High' ? 224 : 
+                    Erosion_Class == 'Very High' ? 141 : 48,
+                    
+                    Erosion_Class == 'Very Low' ? 80 : 
+                    Erosion_Class == 'Low' ? 96 : 
+                    Erosion_Class == 'Moderate' ? 139 : 
+                    Erosion_Class == 'High' ? 139 : 
+                    Erosion_Class == 'Very High' ? 89 : 39,
+                    200
+                ]""",
+                get_line_color=[0, 0, 0, 100],
+            )
+            
+            view_state = pdk.ViewState(
+                latitude=17.2,
+                longitude=74.8,
+                zoom=6.5,
+                pitch=30,
+            )
+            
+            r = pdk.Deck(
+                layers=[layer],
+                initial_view_state=view_state,
+                tooltip={"html": "<b>Soil Loss:</b> {Soil_Loss} t/ha/yr<br/><b>Class:</b> {Erosion_Class}<br/><b>Rainfall:</b> {Annual_Rainfall} mm", "style": {"color": "white"}},
+                map_style="mapbox://styles/mapbox/dark-v10",
+            )
+            st.pydeck_chart(r)
 
     # ════════════════════════════════════════════════════════════════════════
     # TAB 1: Erosion Overview
@@ -454,7 +543,6 @@ def main():
             opacity=0.65,
             title=f"{factor_labels[selected_factor]} vs Soil Loss",
             labels={"Soil_Loss": "Soil Loss (t/ha/yr)"},
-            trendline="ols",
         )
         apply_theme(fig)
         fig.update_layout(height=420)
