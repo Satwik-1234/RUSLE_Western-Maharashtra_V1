@@ -23,6 +23,7 @@ outputs/
 erosion_outputs/
 *.zip
 *.csv
+!data/sample/sample_points_30m_demo.csv
 *.geotiff
 *.tif
 *.tiff
