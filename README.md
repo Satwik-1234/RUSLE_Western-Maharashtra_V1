@@ -445,6 +445,15 @@ Three clustering algorithms are run in **Section 16** on `{Soil_Loss, LS_Factor,
 
 The notebook produces **25+ interactive Plotly charts**, all saved as standalone HTML files and bundled in the export ZIP.
 
+### 🌟 Key Outputs Available in this Repository
+* **[🗺️ Interactive Erosion Map (Folium)](content/erosion_outputs/Interactive_Map/western_maharashtra_interactive_map.html)** — View the 30m resolution erosion classes natively in your browser!
+* **[📈 Master Metrics Dashboard](content/erosion_outputs/Interactive_HTML_Charts/Erosion_Analysis_Dashboard.html)** — A consolidated view of the key Plotly interactive charts.
+
+### 🤖 Machine Learning Feature Importance (SHAP)
+<div align="center">
+<img src="content/erosion_outputs/PNG_Snapshots/plot17_shap_summary.png" width="800" alt="SHAP Summary Plot"/>
+</div>
+
 <details>
 <summary>📂 Full Chart Inventory (click to expand)</summary>
 
